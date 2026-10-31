@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#05070f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta
+      name="description"
+      content="NEON DRIFT — a high-speed midnight city driving game built for mobile."
+    />
+    <title>NEON DRIFT — Midnight City Run</title>
+    <script type="module" crossorigin src="./assets/index-Db6GlXkv.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-GuikQFmr.css">
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="game" aria-label="3D driving game viewport"></canvas>
+
+      <!-- ============ IN-GAME HUD ============ -->
+      <div id="hud" class="hud is-hidden" aria-hidden="true">
+        <div class="hud-top">
+          <div class="hud-panel score-panel">
+            <span class="hud-label">SCORE</span>
+            <div class="score-line">
+              <span id="score">0</span>
+              <span id="combo" class="combo">×1.0</span>
+            </div>
+            <div class="combo-track"><i id="comboFill"></i></div>
+          </div>
+
+          <div class="hud-panel timer-panel">
+            <div class="timer-line">
+              <span class="hud-label">TIME</span>
+              <span id="timer">90.0</span>
+            </div>
+            <div class="timer-track"><i id="timerFill"></i></div>
+            <div class="checkpoint-line">
+              <span class="cp-dot"></span>
+              <span id="checkpointText">CHECKPOINT 320m</span>
+            </div>
+          </div>
+
+          <div class="map-wrap">
+            <div class="minimap-frame">
+              <canvas id="minimap" width="220" height="220"></canvas>
+              <span class="map-label">CITY GRID</span>
+            </div>
+            <button id="pauseBtn" class="icon-btn" aria-label="Pause game">
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" />
+                <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="toastLayer" class="toast-layer" aria-live="polite"></div>
+        <div id="driftBadge" class="drift-badge"><span>DRIFT</span><b id="driftScore">0</b></div>
+
+        <div class="bottom-hud">
+          <div class="speed-cluster">
+            <div class="boost-row">
+              <span class="hud-label">N2O</span>
+              <div class="boost-track"><i id="boostFill"></i></div>
+              <span id="boostState" class="boost-state">READY</span>
+            </div>
+            <div class="speedo">
+              <svg class="speedo-gauge" viewBox="0 0 200 200" aria-hidden="true">
+                <circle class="gauge-track" cx="100" cy="100" r="84" pathLength="100" />
+                <circle id="speedArc" class="gauge-arc" cx="100" cy="100" r="84" pathLength="100" />
+                <circle class="gauge-tick" cx="100" cy="100" r="68" pathLength="100" />
+              </svg>
+              <div class="speed-readout">
+                <span id="speed">0</span>
+                <small>KM/H</small>
+              </div>
+              <div id="gear" class="gear">N</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="controls" class="controls">
+          <div class="steer-pad">
+            <button class="ctrl-btn steer-btn" data-action="left" aria-label="Steer left">
+              <svg viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M20 7 11 16l9 9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <button class="ctrl-btn steer-btn" data-action="right" aria-label="Steer right">
+              <svg viewBox="0 0 32 32" aria-hidden="true">
+                <path d="m12 7 9 9-9 9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+          <div class="pedal-pad">
+            <button class="ctrl-btn pedal-btn brake-btn" data-action="brake" aria-label="Brake">
+              <span>BRAKE</span>
+            </button>
+            <button class="ctrl-btn pedal-btn drift-btn" data-action="drift" aria-label="Handbrake drift">
+              <span>DRIFT</span>
+            </button>
+            <button class="ctrl-btn pedal-btn boost-btn" data-action="boost" aria-label="Nitrous boost">
+              <span>N2O</span>
+            </button>
+            <button class="ctrl-btn pedal-btn gas-btn" data-action="gas" aria-label="Accelerate">
+              <svg viewBox="0 0 40 40" aria-hidden="true">
+                <path d="M20 8v24M10 18l10-10 10 10" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="countdown" class="countdown"></div>
+        <div id="damageFlash" class="damage-flash"></div>
+      </div>
+
+      <!-- ============ START SCREEN ============ -->
+      <section id="startScreen" class="screen start-screen">
+        <div class="screen-grain"></div>
+        <div class="start-content">
+          <div class="brand">
+            <span class="brand-kicker">MIDNIGHT CITY RUN</span>
+            <h1 class="brand-title">
+              <span class="brand-line outline">NEON</span>
+              <span class="brand-line filled">DRIFT</span>
+            </h1>
+            <p class="brand-sub">Own the grid. Chain drifts. Outrun the clock.</p>
+          </div>
+
+          <div class="start-actions">
+            <button id="startBtn" class="start-btn" aria-label="Start">
+              <span class="start-btn-glow"></span>
+              <span class="start-btn-label">START</span>
+              <span class="start-btn-note">TAP TO DRIVE</span>
+            </button>
+            <div class="best-line">
+              <span>BEST RUN</span>
+              <b id="bestScore">0</b>
+            </div>
+          </div>
+
+          <div class="start-meta">
+            <div class="control-hints">
+              <div class="hint">
+                <span class="key">◀ ▶</span>
+                <span>STEER</span>
+              </div>
+              <div class="hint">
+                <span class="key">DRIFT</span>
+                <span>CHARGE N2O</span>
+              </div>
+              <div class="hint">
+                <span class="key">N2O</span>
+                <span>BOOST</span>
+              </div>
+            </div>
+
+            <div class="settings-row">
+              <button class="toggle" id="soundToggle" aria-pressed="true">
+                <span class="toggle-dot"></span>SOUND
+              </button>
+              <button class="toggle" id="tiltToggle" aria-pressed="false">
+                <span class="toggle-dot"></span>TILT STEER
+              </button>
+              <button class="toggle quality-toggle" id="qualityToggle" aria-pressed="false">
+                <span class="toggle-dot"></span><span id="qualityLabel">QUALITY AUTO</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="start-footer">
+          <span>WEBGL · 60 FPS · BUILT FOR MOBILE</span>
+          <span class="footer-links">
+            <button id="howBtn" class="text-btn">HOW TO PLAY</button>
+          </span>
+        </div>
+
+        <div id="howPanel" class="how-panel is-hidden">
+          <h2>HOW TO PLAY</h2>
+          <ul>
+            <li><b>Steer</b> with the left pads or tilt your phone.</li>
+            <li><b>Gas</b> on the right. Tap <b>DRIFT</b> while turning to slide.</li>
+            <li>Drifting and near misses charge <b>N2O</b> and multiply your score.</li>
+            <li>Blast through <b>checkpoints</b> to add time. The clock never stops.</li>
+            <li>Desktop: WASD / arrows, Space to drift, Shift for boost.</li>
+          </ul>
+          <button id="howClose" class="ghost-btn">GOT IT</button>
+        </div>
+      </section>
+
+      <!-- ============ PAUSE ============ -->
+      <section id="pauseScreen" class="screen pause-screen is-hidden">
+        <div class="pause-card">
+          <span class="brand-kicker">SYSTEM PAUSED</span>
+          <h2>TAKE A BREATH</h2>
+          <div class="pause-stats">
+            <div><span>SCORE</span><b id="pauseScore">0</b></div>
+            <div><span>TIME</span><b id="pauseTime">0.0</b></div>
+            <div><span>SPEED</span><b id="pauseSpeed">0</b></div>
+          </div>
+          <button id="resumeBtn" class="start-btn small" aria-label="Resume">
+            <span class="start-btn-label">RESUME</span>
+          </button>
+          <button id="quitBtn" class="ghost-btn">END RUN</button>
+        </div>
+      </section>
+
+      <!-- ============ GAME OVER ============ -->
+      <section id="overScreen" class="screen over-screen is-hidden">
+        <div class="over-card">
+          <span class="brand-kicker">RUN COMPLETE</span>
+          <h2 class="over-title">NIGHT'S OVER</h2>
+          <div class="final-score">
+            <span>FINAL SCORE</span>
+            <b id="finalScore">0</b>
+            <em id="newBest" class="new-best is-hidden">NEW RECORD</em>
+          </div>
+          <div class="result-grid">
+            <div><span>DISTANCE</span><b id="statDistance">0 m</b></div>
+            <div><span>TOP SPEED</span><b id="statTopSpeed">0 km/h</b></div>
+            <div><span>DRIFT SCORE</span><b id="statDrift">0</b></div>
+            <div><span>CHECKPOINTS</span><b id="statCheckpoints">0</b></div>
+          </div>
+          <button id="retryBtn" class="start-btn small" aria-label="Play Again">
+            <span class="start-btn-label">PLAY AGAIN</span>
+          </button>
+          <button id="menuBtn" class="ghost-btn">BACK TO MENU</button>
+        </div>
+      </section>
+
+      <!-- ============ LOADING ============ -->
+      <div id="loadingScreen" class="loading-screen">
+        <div class="loader-mark">
+          <span class="loader-ring"></span>
+          <span class="loader-core"></span>
+        </div>
+        <div class="loader-text">WARMING UP THE CITY</div>
+        <div class="loader-bar"><i id="loaderFill"></i></div>
+      </div>
+
+      <div id="rotateHint" class="rotate-hint">
+        <svg viewBox="0 0 64 64" width="42" height="42" aria-hidden="true">
+          <rect x="18" y="6" width="28" height="52" rx="5" fill="none" stroke="currentColor" stroke-width="3" />
+          <path d="M8 24a24 24 0 0 1 6-8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+        </svg>
+        <span>ROTATE YOUR PHONE FOR THE FULL VIEW</span>
+        <button id="rotateDismiss" class="ghost-btn small">CONTINUE</button>
+      </div>
+    </div>
+
+  </body>
+</html>
