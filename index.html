@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#1d2b21" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Ridgewood — A Colony Story</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2319241b'/%3E%3Cpath d='M16 4 27 10v12L16 28 5 22V10Z' fill='none' stroke='%23efb867' stroke-width='1.6'/%3E%3Cpath d='M11 21c0-5 2.3-8 5-8s5 3 5 8' fill='none' stroke='%23efb867' stroke-width='1.8'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="scene"></div>
+
+      <div id="ui">
+        <header id="topbar" class="hud-layer">
+          <div id="colony-id">
+            <div class="crest" aria-hidden="true">
+              <svg viewBox="0 0 32 32"><path d="M16 3 27 10v12L16 29 5 22V10Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m16 8 6 4v7l-6 4-6-4v-7Z" fill="currentColor" opacity=".22"/><path d="M11 20c0-4 2.3-7 5-7s5 3 5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            </div>
+            <div class="colony-text">
+              <h1>Ridgewood</h1>
+              <div id="clock-line"><span id="clock">07:20</span><span class="dot">·</span><span id="day">Day 1</span><span class="dot">·</span><span id="weather">Clear</span></div>
+            </div>
+          </div>
+
+          <div id="resource-bar" class="glass">
+            <div class="res" data-res="wood"><span class="res-icon wood"></span><span class="res-val">120</span></div>
+            <div class="res" data-res="stone"><span class="res-icon stone"></span><span class="res-val">60</span></div>
+            <div class="res" data-res="food"><span class="res-icon food"></span><span class="res-val">34</span></div>
+            <div class="res" data-res="silver"><span class="res-icon silver"></span><span class="res-val">0</span></div>
+          </div>
+
+          <div id="top-actions">
+            <button id="btn-objectives" class="icon-btn glass" aria-label="Colony log">
+              <svg viewBox="0 0 24 24"><path d="M7 4h10a2 2 0 0 1 2 2v14l-7-3-7 3V6a2 2 0 0 1 2-2Z"/><path d="M9 8h6M9 11h6"/></svg>
+            </button>
+            <button id="btn-sound" class="icon-btn glass" aria-label="Toggle sound">
+              <svg viewBox="0 0 24 24" class="snd-on"><path d="M5 9v6h4l5 4V5L9 9H5Z"/><path d="M17 8.5a5 5 0 0 1 0 7"/><path d="M19.5 6a8.5 8.5 0 0 1 0 12"/></svg>
+              <svg viewBox="0 0 24 24" class="snd-off"><path d="M5 9v6h4l5 4V5L9 9H5Z"/><path d="m17 9 4 6M21 9l-4 6"/></svg>
+            </button>
+            <button id="btn-menu" class="icon-btn glass" aria-label="Menu">
+              <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <div id="alerts" class="hud-layer" aria-live="polite"></div>
+
+        <div id="colonist-dock" class="hud-layer glass">
+          <div id="colonist-strip"></div>
+        </div>
+
+        <aside id="selection-panel" class="hud-layer glass hidden">
+          <button id="sel-close" class="mini-x" aria-label="Close selection">×</button>
+          <div class="sel-head">
+            <div id="sel-portrait" class="portrait"><canvas width="120" height="120"></canvas></div>
+            <div class="sel-title">
+              <h2 id="sel-name">Mara</h2>
+              <p id="sel-role">Builder · Level 4</p>
+              <div id="sel-mood" class="mood-row"><span class="mood-dot"></span><span>Content</span></div>
+            </div>
+          </div>
+          <div class="needs" id="sel-needs"></div>
+          <div class="sel-activity"><span class="act-icon"></span><span id="sel-activity">Chopping pine</span></div>
+          <div class="skills" id="sel-skills"></div>
+          <div class="sel-actions">
+            <button class="pill-btn" data-action="focus">Center</button>
+            <button class="pill-btn" data-action="prioritize">Prioritize</button>
+          </div>
+        </aside>
+
+        <div id="build-sheet" class="hud-layer">
+          <div class="sheet-backdrop"></div>
+          <section class="sheet glass-strong">
+            <div class="sheet-handle"></div>
+            <div class="sheet-head">
+              <div>
+                <p class="eyebrow">Construction</p>
+                <h2>Build something</h2>
+              </div>
+              <button id="sheet-close" class="mini-x" aria-label="Close build menu">×</button>
+            </div>
+            <div id="build-grid"></div>
+            <div class="sheet-foot">
+              <span class="cost-preview" id="cost-preview">Select a structure</span>
+              <span class="hint">Tap the ground to place · drag to pan</span>
+            </div>
+          </section>
+        </div>
+
+        <nav id="bottom-dock" class="hud-layer">
+          <div id="tool-row" class="glass">
+            <button class="tool" data-tool="select" aria-label="Select and inspect">
+              <span class="tool-ic"><svg viewBox="0 0 24 24"><path d="m5 3 14 8-6 1.5L10 19 5 3Z"/></svg></span>
+              <span class="tool-label">Inspect</span>
+            </button>
+            <button class="tool" data-tool="chop" aria-label="Chop trees">
+              <span class="tool-ic"><svg viewBox="0 0 24 24"><path d="m14 3 6 3-2 4-6-3Z"/><path d="m12.5 8.5 2 3L7 19l-3-2 8.5-8.5Z"/></svg></span>
+              <span class="tool-label">Chop</span>
+            </button>
+            <button class="tool" data-tool="mine" aria-label="Mine rock">
+              <span class="tool-ic"><svg viewBox="0 0 24 24"><path d="M4 20 15 7"/><path d="M8 3c4 0 8 2 9 6l-3 1c-1-3-3-4-6-4Z"/><path d="m14 4 3 5"/></svg></span>
+              <span class="tool-label">Mine</span>
+            </button>
+            <button class="tool" data-tool="harvest" aria-label="Harvest crops">
+              <span class="tool-ic"><svg viewBox="0 0 24 24"><path d="M12 21V9"/><path d="M12 13c-4 0-6-2-6-5 4 0 6 2 6 5Z"/><path d="M12 11c4 0 6-2 6-5-4 0-6 2-6 5Z"/><path d="M8 21h8"/></svg></span>
+              <span class="tool-label">Harvest</span>
+            </button>
+            <button class="tool" data-tool="build" aria-label="Open build menu">
+              <span class="tool-ic"><svg viewBox="0 0 24 24"><path d="m3 11 9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg></span>
+              <span class="tool-label">Build</span>
+              <span class="tool-badge" id="build-badge">+</span>
+            </button>
+            <button class="tool" data-tool="cancel" aria-label="Cancel current action" hidden>
+              <span class="tool-ic"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span>
+              <span class="tool-label">Cancel</span>
+            </button>
+          </div>
+        </nav>
+
+        <div id="speed-dock" class="hud-layer glass">
+          <button class="spd" data-speed="0" aria-label="Pause"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke-width="3"/></svg></button>
+          <button class="spd active" data-speed="1" aria-label="Normal speed"><svg viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z"/></svg></button>
+          <button class="spd" data-speed="2" aria-label="Fast speed"><svg viewBox="0 0 24 24"><path d="m4 5 8 7-8 7V5Z"/><path d="m12 5 8 7-8 7V5Z"/></svg></button>
+          <button class="spd" data-speed="4" aria-label="Very fast speed"><svg viewBox="0 0 24 24"><path d="m2 5 7 7-7 7V5Z"/><path d="m9 5 7 7-7 7V5Z"/><path d="m16 5 7 7-7 7V5Z"/></svg></button>
+        </div>
+
+        <div id="toasts" class="hud-layer" aria-live="polite"></div>
+
+        <div id="tutorial" class="hud-layer glass">
+          <div class="tut-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.2"/></svg>
+          </div>
+          <div class="tut-copy">
+            <strong id="tut-title">Welcome to Ridgewood</strong>
+            <span id="tut-text">Drag to pan · pinch to zoom · tap a settler</span>
+          </div>
+          <button id="tut-next" class="pill-btn">Got it</button>
+        </div>
+
+        <div id="log-panel" class="hud-layer">
+          <div class="sheet-backdrop"></div>
+          <section class="sheet glass-strong log-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-head">
+              <div><p class="eyebrow">Chronicle</p><h2>Colony log</h2></div>
+              <button id="log-close" class="mini-x" aria-label="Close log">×</button>
+            </div>
+            <div id="log-list"></div>
+            <div class="sheet-foot"><span class="hint">Objectives</span></div>
+            <div id="objective-list"></div>
+          </section>
+        </div>
+
+        <div id="menu-panel" class="hud-layer">
+          <div class="sheet-backdrop"></div>
+          <section class="sheet glass-strong menu-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-head">
+              <div><p class="eyebrow">Ridgewood</p><h2>Colony menu</h2></div>
+              <button id="menu-close" class="mini-x" aria-label="Close menu">×</button>
+            </div>
+            <div class="menu-body">
+              <p class="menu-copy">A quiet valley. Three settlers. Build a home worth waking up in.</p>
+              <div class="menu-stats" id="menu-stats"></div>
+              <button class="wide-btn" id="btn-help">How to play</button>
+              <button class="wide-btn ghost" id="btn-reset">Restart colony</button>
+            </div>
+          </section>
+        </div>
+
+        <div id="help-overlay" class="hud-layer">
+          <div class="help-card glass-strong">
+            <h2>Field guide</h2>
+            <div class="help-rows">
+              <div><b>Move</b><span>Drag with one finger or WASD</span></div>
+              <div><b>Zoom</b><span>Pinch, wheel, or Q / E</span></div>
+              <div><b>Rotate</b><span>Twist two fingers or hold right-drag</span></div>
+              <div><b>Work</b><span>Pick Chop, Mine, or Harvest, then tap targets</span></div>
+              <div><b>Build</b><span>Open Build, choose a structure, tap ground</span></div>
+              <div><b>Grow</b><span>Keep food stocked, beds warm, and the fire lit</span></div>
+            </div>
+            <button class="wide-btn" id="help-close">Back to the valley</button>
+          </div>
+        </div>
+
+        <div id="placement-tip" class="hud-layer">
+          <div class="placement-pill glass">
+            <span id="placement-name">Wall</span>
+            <span class="sep"></span>
+            <span id="placement-cost">5 wood</span>
+            <button id="placement-cancel" class="mini-x" aria-label="Cancel placement">×</button>
+          </div>
+        </div>
+
+        <div id="labels" class="hud-layer" aria-hidden="true"></div>
+        <div id="vignette" aria-hidden="true"></div>
+      </div>
+
+      <div id="loading">
+        <div class="load-mark">
+          <svg viewBox="0 0 64 64"><path d="M32 5 56 19v26L32 59 8 45V19Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M32 13 48 22v20L32 51 16 42V22Z" fill="none" stroke="currentColor" stroke-width="1"/><path d="M20 41c0-9 5-16 12-16s12 7 12 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="32" cy="34" r="2.6" fill="currentColor"/></svg>
+        </div>
+        <p>Ridgewood</p>
+        <span>Raising the valley…</span>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
